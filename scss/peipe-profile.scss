@@ -1,0 +1,47 @@
+.peipe-profile-page { max-width: 720px; margin: 0 auto; padding: 14px 12px 88px; color: #111827; }
+.peipe-profile-loading { padding: 40px 16px; text-align: center; color: #6b7280; }
+.peipe-profile-shell { display: flex; flex-direction: column; gap: 14px; }
+.peipe-profile-hero { position: relative; overflow: hidden; border-radius: 28px; padding: 18px; background: radial-gradient(circle at 18% 0%, rgba(255,119,166,.22), transparent 32%), radial-gradient(circle at 88% 12%, rgba(119,91,255,.20), transparent 32%), linear-gradient(135deg, rgba(255,255,255,.96), rgba(250,247,255,.88)); border: 1px solid rgba(255,255,255,.72); box-shadow: 0 18px 48px rgba(91,72,139,.14); backdrop-filter: blur(18px); }
+.peipe-profile-cover { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(135deg, rgba(255,255,255,.42), transparent 52%), radial-gradient(circle at 50% 110%, rgba(255,255,255,.8), transparent 42%); }
+.peipe-profile-main { position: relative; z-index: 1; display: flex; align-items: center; gap: 14px; }
+.peipe-profile-avatar { width: 86px; height: 86px; border-radius: 28px; overflow: hidden; flex: 0 0 auto; background: linear-gradient(135deg, #f6eaff, #eef2ff); box-shadow: 0 14px 34px rgba(0,0,0,.12); }
+.peipe-profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.peipe-profile-info { min-width: 0; }
+.peipe-profile-info h1 { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 900; letter-spacing: -.02em; }
+.peipe-profile-slug { margin-top: 4px; color: #6b7280; font-size: 13px; }
+.peipe-profile-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+.peipe-profile-chips span { padding: 5px 9px; border-radius: 999px; background: rgba(255,255,255,.72); border: 1px solid rgba(255,255,255,.86); font-size: 12px; color: #374151; }
+.peipe-profile-chips .male { color: #3b82f6; font-weight: 900; }
+.peipe-profile-chips .female { color: #a855f7; font-weight: 900; }
+.peipe-profile-stats { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 16px; }
+.peipe-profile-stat { border-radius: 18px; padding: 10px 6px; text-align: center; background: rgba(255,255,255,.64); border: 1px solid rgba(255,255,255,.78); }
+.peipe-profile-stat b { display: block; font-size: 17px; line-height: 1.1; }
+.peipe-profile-stat span { display: block; margin-top: 3px; color: #6b7280; font-size: 12px; }
+.peipe-profile-about { position: relative; z-index: 1; margin: 14px 0 0; color: #374151; font-size: 14px; line-height: 1.55; }
+.peipe-profile-tabs { position: sticky; top: 0; z-index: 10; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 8px; border-radius: 999px; background: rgba(255,255,255,.82); backdrop-filter: blur(18px); box-shadow: 0 12px 30px rgba(0,0,0,.08); }
+.peipe-profile-tabs button, .peipe-profile-tabs a { display: flex; justify-content: center; align-items: center; height: 38px; border: 0; border-radius: 999px; background: transparent; color: #6b7280; font-weight: 800; text-decoration: none; }
+.peipe-profile-tabs .active { color: #fff; background: linear-gradient(135deg, #7c3aed, #ec4899); box-shadow: 0 10px 22px rgba(124,58,237,.24); }
+.peipe-rating-summary { display: flex; align-items: center; gap: 14px; border-radius: 24px; padding: 16px; background: #fff; box-shadow: 0 12px 36px rgba(17,24,39,.08); }
+.peipe-rating-number { font-size: 40px; line-height: 1; font-weight: 950; letter-spacing: -.05em; }
+.peipe-rating-side span { display: block; margin-top: 5px; color: #6b7280; font-size: 13px; }
+.peipe-stars { display: inline-flex; align-items: center; gap: 2px; }
+.peipe-star { border: 0; padding: 0 1px; background: transparent; color: #d1d5db; font-size: 18px; line-height: 1; }
+.peipe-star.active { color: #f59e0b; }
+.peipe-stars.is-editable .peipe-star { font-size: 28px; }
+.peipe-comment-compose, .peipe-own-profile-note, .peipe-empty-comments, .peipe-comment-item { border-radius: 24px; background: #fff; box-shadow: 0 12px 36px rgba(17,24,39,.08); }
+.peipe-comment-compose { padding: 16px; }
+.peipe-compose-title { margin-bottom: 10px; font-weight: 900; }
+.peipe-comment-input { width: 100%; min-height: 92px; margin-top: 12px; padding: 12px 13px; border-radius: 18px; border: 1px solid #e5e7eb; background: #f9fafb; resize: vertical; outline: none; }
+.peipe-comment-input:focus { border-color: #a78bfa; box-shadow: 0 0 0 4px rgba(167,139,250,.16); }
+.peipe-comment-submit { width: 100%; height: 44px; margin-top: 12px; border: 0; border-radius: 999px; color: #fff; font-weight: 900; background: linear-gradient(135deg, #7c3aed, #ec4899); box-shadow: 0 14px 28px rgba(124,58,237,.24); }
+.peipe-own-profile-note, .peipe-empty-comments { padding: 16px; color: #6b7280; }
+.peipe-comments-list { display: flex; flex-direction: column; gap: 10px; }
+.peipe-comment-item { display: flex; gap: 10px; padding: 12px; }
+.peipe-comment-avatar { width: 42px; height: 42px; border-radius: 16px; overflow: hidden; flex: 0 0 auto; background: #f3f4f6; }
+.peipe-comment-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.peipe-comment-body { min-width: 0; flex: 1; }
+.peipe-comment-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.peipe-comment-head b { font-size: 14px; }
+.peipe-comment-body p { margin: 6px 0 0; color: #374151; font-size: 14px; line-height: 1.55; }
+@media (max-width: 480px) { .peipe-profile-page { padding: 10px 10px 88px; } .peipe-profile-hero { border-radius: 24px; padding: 15px; } .peipe-profile-avatar { width: 76px; height: 76px; border-radius: 24px; } .peipe-profile-info h1 { font-size: 22px; } .peipe-profile-stats { gap: 6px; } .peipe-profile-stat { padding: 9px 4px; } }
+
