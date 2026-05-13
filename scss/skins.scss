@@ -1,0 +1,81 @@
+.skin-quartz {
+	// quartz doesn't need body-bg for tool background
+	.sticky-tools {
+		background-color: initial;
+	}
+	.post-container-parent > div.rounded-circle {
+		// box-shadow: none!important;
+		box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2)!important;
+	}
+	// $body-bg-image is gradient in quartz
+	.topic-main-buttons, .topic-list-header, [component="post"] .icon {
+		background-color: transparent !important;
+	}
+	.form-control::placeholder, .bootstrap-tagsinput input::placeholder {
+		color: $gray-100!important;
+	}
+	.position-sticky.bg-body {
+		background-color: transparent!important;
+		backdrop-filter: blur(5px);
+	}
+	[component="profile/change/picture"].avatar-wrapper {
+		background: linear-gradient(90deg, rgb(51.3, 182.7, 225.9), rgb(93.6, 98.1, 175.5), rgb(220.4, 47.5, 124.45));
+  		background-attachment: fixed;
+	}
+}
+
+.skin-brite {
+	.topic-sidebar-tools .btn {
+		// this removes the 3px left margin on buttons in brite skin
+		// without this buttons in the sidebar on topic.tpl aren't properly aligned
+		margin-left: 0px;
+	}
+}
+
+.skin-solar {
+	.form-control::placeholder {
+		color:$gray-100!important;
+	}
+}
+
+.skin-quartz, .skin-lux, .skin-morph {
+	// $spacer being modified looks bad on this element
+	.topic-list-header .btn, .topic-main-buttons .btn {
+		padding: 6px 12px;
+	}
+}
+
+.skin-yeti {
+	.badge {
+		padding-left: 0.5rem;
+		padding-right: 0.5rem;
+	}
+	.tag-list .tag { padding-left: 1.125rem; }
+}
+
+// table color fix, remove once https://github.com/thomaspark/bootswatch/issues/1276 is published
+.skin-darkly, .skin-superhero, .skin-solar, .skin-quartz {
+	table > :not(caption) > * > * {
+		color: white;
+	}
+}
+
+.skin-superhero {
+	// fix read button in dropdowns
+	.mark-read .read {
+		color: $primary!important;
+	}
+}
+
+.skin-slate {
+	// fix unread button colors in dropdowns
+	.mark-read .unread {
+		color: $secondary!important;
+	}
+}
+
+.skin-morph {
+	.text-secondary {
+		color: #7b8ab8!important;
+	}
+}

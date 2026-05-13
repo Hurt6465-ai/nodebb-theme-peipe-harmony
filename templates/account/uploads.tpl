@@ -1,0 +1,37 @@
+<!-- IMPORT partials/account/header.tpl -->
+
+<h3 class="fw-semibold fs-5">{title}</h3>
+
+<div class="alert alert-info text-center">
+	{{{ if privateUploads }}}[[uploads:private-uploads-info]]{{{ else }}}[[uploads:public-uploads-info]]{{{ end }}}
+</div>
+
+{{{ if !uploads.length }}}
+<div class="alert alert-warning text-center">[[uploads:no-uploads-found]]</div>
+{{{ end }}}
+
+<div class="table-responsive">
+	<table class="table table-sm w-100">
+		<thead>
+			<tr>
+				<th></th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{{ each uploads }}}
+			<tr data-name="{./name}">
+				<td class="align-middle">
+					<a class="text-break text-reset text-sm" href="{config.relative_path}{./url}">{./url}</a>
+				</td>
+				<td style="width: 1%; white-space: nowrap;">
+					<button class="btn btn-danger btn-sm" data-action="delete" aria-label="[[aria:delete-upload-button]]"><i class="fa fa-trash"></i></button>
+				</td>
+			</tr>
+			{{{ end }}}
+		</tbody>
+	</table>
+</div>
+
+<!-- IMPORT partials/paginator.tpl -->
+<!-- IMPORT partials/account/footer.tpl -->

@@ -1,0 +1,52 @@
+{
+  "name": "nodebb-theme-peipe-harmony",
+  "version": "1.0.0",
+  "nbbpm": {
+    "compatibility": "^4.0.0"
+  },
+  "description": "Peipe theme based on the installed NodeBB Harmony theme",
+  "main": "library.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hurt6465-ai/nodebb-theme-peipe-harmony"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "publish:patch": "npm version patch && npm run publish:common",
+    "publish:minor": "npm version minor && npm run publish:common",
+    "publish:major": "npm version major && npm run publish:common",
+    "publish:common": "git push && git push --tags && npm publish"
+  },
+  "keywords": [
+    "nodebb",
+    "theme",
+    "forum",
+    "bootstrap",
+    "responsive"
+  ],
+  "contributors": [
+    {
+      "name": "Julian Lam",
+      "email": "julian@nodebb.org",
+      "url": "https://github.com/julianlam"
+    },
+    {
+      "name": "Barış Soner Uşaklı",
+      "email": "baris@nodebb.org",
+      "url": "https://github.com/barisusakli"
+    }
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Hurt6465-ai/nodebb-theme-peipe-harmony/issues"
+  },
+  "dependencies": {
+    "@fontsource/inter": "5.2.8",
+    "@fontsource/poppins": "5.2.7"
+  },
+  "devDependencies": {
+    "eslint": "10.1.0",
+    "eslint-config-nodebb": "^2.0.0"
+  },
+  "homepage": "https://github.com/Hurt6465-ai/nodebb-theme-peipe-harmony"
+}

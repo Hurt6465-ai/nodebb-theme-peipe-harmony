@@ -1,0 +1,49 @@
+<div class="no-notifs text-center p-4 d-flex flex-column {{{ if notifications.length }}}hidden{{{ end }}}">
+	<div class="p-4"><i class="fa-solid fa-wind fs-2 text-muted"></i></div>
+	<div class="text-xs fw-semibold text-muted">[[notifications:no-notifs]]</div>
+</div>
+
+{{{ each notifications }}}
+<div class="{./readClass}" data-nid="{./nid}" data-path="{./path}" {{{ if ./pid }}}data-pid="{./pid}"{{{ end }}}{{{ if ./tid }}}data-tid="{./tid}"{{{ end }}}>
+	<div class="d-flex gap-1 justify-content-between">
+		<div class="btn btn-ghost btn-sm d-flex gap-2 flex-grow-1 align-items-start text-start">
+			<a class="flex-grow-0 flex-shrink-0" href="{{{ if ./user.userslug}}}{config.relative_path}/user/{./user.userslug}{{{ else }}}#{{{ end }}}">
+				{{{ if ./user }}}
+				{buildAvatar(./user, "32px", true)}
+				{{{ else }}}
+					{{{ if ./icon }}}
+					<div class="avatar avatar-rounded" style="--avatar-size: 32px;"><i class="text-secondary fa {./icon}"></i></div>
+					{{{ else }}}
+						{{{ if ./image }}}
+						<img class="avatar avatar-rounded" style="--avatar-size: 32px;" src="{./image}" />
+						{{{ end }}}
+					{{{ end }}}
+				{{{ end }}}
+			</a>
+
+			<div class="d-flex flex-grow-1 flex-column gap-1 align-items-start position-relative">
+				<a href="{./path}" class="text-decoration-none d-inline-block text-reset text-break text-sm ff-sans stretched-link" component="notifications/item/link">
+					{./bodyShort}
+				</a>
+				{{{ if ./bodyLong}}}
+				<div class="text-secondary text-sm line-clamp-2 text-contain hidden-blockquote hidden-pre hidden-first-child-br">
+					{./bodyLong}
+				</div>
+				{{{ end }}}
+				<div class="text-xs text-muted">{{{ if ./timeagoLong }}}{./timeagoLong}{{{ else }}}<span class="timeago" title="{./datetimeISO}"></span>{{{ end }}}</div>
+			</div>
+		</div>
+		<div>
+			{{{ if ./nid }}}
+			<button class="mark-read btn btn-ghost btn-sm d-flex align-items-center justify-content-center flex-grow-0 flex-shrink-0 p-1" style="width: 1.5rem; height: 1.5rem;">
+				<i class="unread fa fa-2xs fa-circle text-primary {{{ if ./read }}}hidden{{{ end }}}" aria-label="[[unread:mark-as-read]]"></i>
+				<i class="read fa fa-2xs fa-circle-o text-secondary {{{ if !./read }}}hidden{{{ end }}}" aria-label="[[unread:mark-as-unread]]"></i>
+			</button>
+			{{{ end }}}
+		</div>
+	</div>
+	{{{ if !@last }}}
+	<hr class="my-1" />
+	{{{ end }}}
+</div>
+{{{ end }}}
