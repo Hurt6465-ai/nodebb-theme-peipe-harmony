@@ -1,132 +1,170 @@
-/* Peipe Harmony profile v16
-   - XHS-style profile shell for NodeBB 4.x Harmony clone
-   - Renders immediately from ajaxify/template data; comments/topics load lazily
-   - Keeps account/profile/about/topics inside the same modern shell
+/* Peipe XHS Profile v17
+   - Big XHS-style card like reference 4
+   - Own profile: compressed avatar/background upload + edit data
+   - Images compressed before upload via Canvas, WebP preferred
 */
 (function () {
   'use strict';
 
-  if (window.__peipeProfileHarmonyV16) return;
-  window.__peipeProfileHarmonyV16 = true;
+  if (window.__peipeXhsProfileV17) return;
+  window.__peipeXhsProfileV17 = true;
 
-  var TEXTS = {
+  var CONFIG = {
+    cid: 6,
+    mobileMax: 900,
+    socialImage: {
+      maxSide: 1080,
+      maxSizeMB: 0.09,
+      quality: 0.58,
+      minCompressBytes: 70 * 1024,
+      useWebp: true,
+      qualities: [0.58, 0.50, 0.44, 0.38, 0.32, 0.26, 0.22]
+    },
+    avatarImage: {
+      maxSide: 512,
+      maxSizeMB: 0.06,
+      quality: 0.56,
+      minCompressBytes: 45 * 1024,
+      useWebp: true,
+      qualities: [0.56, 0.48, 0.40, 0.34, 0.28, 0.22]
+    }
+  };
+
+  var TEXT = {
     zh: {
-      loadingComments: '评价加载中...',
-      noComments: '还没有评价。',
-      commentsApiMissing: '评价接口还没启用，请先更新语伴插件评论版。',
-      commentLocked: '暂时不能评价：需要互相聊过满 24 小时或满足评价权限后才能评价。',
-      commentFail: '评价失败',
-      writeReview: '给 TA 评价',
-      updateReview: '更新评价',
-      submitReview: '发布评价',
-      reviewPlaceholder: '写一句真实印象，例如：很有耐心，适合练口语。',
-      loginToReview: '登录后可以给 TA 评价。',
-      ownProfileNote: '这是你的主页，下面会显示别人给你的评价。',
-      comments: '评价',
-      posts: '动态',
-      profile: '资料',
-      scorePeople: '人评分',
-      reputation: '声望',
-      topics: '主题',
-      postsCount: '帖子',
-      followers: '粉丝',
-      bioEmpty: '这个人还没有填写介绍。',
-      profileInfo: '个人资料',
-      partnerInfo: '语伴资料',
-      topicsLoading: '动态加载中...',
-      topicsEmpty: '还没有公开动态。',
-      topicsFail: '动态加载失败，可以打开原动态页查看。',
-      openOriginal: '打开原动态',
-      unknown: '未填写',
+      loading: '加载中...',
+      home: '主页',
+      notes: '笔记',
+      info: '资料',
+      reviews: '评价',
+      edit: '编辑资料',
+      save: '保存更改',
+      cancel: '取消',
+      uploadAvatar: '上传头像',
+      uploadCover: '上传背景',
+      changeAvatar: '换头像',
+      changeCover: '换背景',
+      saving: '保存中...',
+      uploading: '上传中...',
+      uploadOk: '上传成功',
+      uploadFail: '上传失败',
+      saveOk: '资料已保存',
+      saveFail: '保存失败',
+      name: '显示名',
+      bio: '简介',
+      country: '国家 / 地区',
+      gender: '性别',
+      birthday: '生日',
+      nativeLang: '母语',
+      learnLang: '想学',
+      occupation: '职业',
+      relationship: '感情',
+      height: '身高 cm',
+      weight: '体重 kg',
       male: '男',
       female: '女',
       secret: '保密',
-      nativeLang: '母语',
-      learningLang: '想学',
-      country: '国籍',
-      height: '身高',
-      weight: '体重',
-      education: '学历',
-      job: '职业',
-      relationship: '感情状况',
-      tags: '标签'
+      none: '未填写',
+      following: '关注',
+      followers: '粉丝',
+      views: '浏览',
+      reputation: '声望',
+      chat: '聊天',
+      follow: '关注',
+      followed: '已关注',
+      backHome: '返回主页',
+      noBio: '这个人还没有写简介。',
+      emptyNotes: '还没有笔记。',
+      emptyReviews: '还没有评价。',
+      writeReview: '给 TA 评价',
+      reviewPlaceholder: '写一句真实印象，例如：很有耐心，适合练口语。',
+      submitReview: '发布评价',
+      updateReview: '更新评价',
+      needLogin: '请先登录',
+      cannotReview: '暂时不能评价：需要互相聊过或满足评价权限后才能评价。',
+      reviewFail: '评价失败'
     },
     en: {
-      loadingComments: 'Loading reviews...',
-      noComments: 'No reviews yet.',
-      commentsApiMissing: 'Review API is not enabled. Please update the Peipe partners plugin.',
-      commentLocked: 'You cannot review yet. Reviews require enough chat history or permission.',
-      commentFail: 'Review failed',
-      writeReview: 'Review this partner',
-      updateReview: 'Update review',
-      submitReview: 'Post review',
-      reviewPlaceholder: 'Write a real impression, e.g. Patient and good for speaking practice.',
-      loginToReview: 'Log in to review this partner.',
-      ownProfileNote: 'This is your profile. Reviews from others will appear here.',
-      comments: 'Reviews',
-      posts: 'Posts',
-      profile: 'Profile',
-      scorePeople: 'ratings',
-      reputation: 'Rep',
-      topics: 'Topics',
-      postsCount: 'Posts',
-      followers: 'Fans',
-      bioEmpty: 'No bio yet.',
-      profileInfo: 'Profile',
-      partnerInfo: 'Partner profile',
-      topicsLoading: 'Loading posts...',
-      topicsEmpty: 'No public posts yet.',
-      topicsFail: 'Could not load posts. You can open the original page.',
-      openOriginal: 'Open original',
-      unknown: 'Not set',
+      loading: 'Loading...',
+      home: 'Home',
+      notes: 'Notes',
+      info: 'Info',
+      reviews: 'Reviews',
+      edit: 'Edit profile',
+      save: 'Save',
+      cancel: 'Cancel',
+      uploadAvatar: 'Upload avatar',
+      uploadCover: 'Upload background',
+      changeAvatar: 'Avatar',
+      changeCover: 'Background',
+      saving: 'Saving...',
+      uploading: 'Uploading...',
+      uploadOk: 'Uploaded',
+      uploadFail: 'Upload failed',
+      saveOk: 'Saved',
+      saveFail: 'Save failed',
+      name: 'Display name',
+      bio: 'Bio',
+      country: 'Country',
+      gender: 'Gender',
+      birthday: 'Birthday',
+      nativeLang: 'Native',
+      learnLang: 'Learning',
+      occupation: 'Occupation',
+      relationship: 'Relationship',
+      height: 'Height cm',
+      weight: 'Weight kg',
       male: 'Male',
       female: 'Female',
       secret: 'Secret',
-      nativeLang: 'Native',
-      learningLang: 'Learning',
-      country: 'Country',
-      height: 'Height',
-      weight: 'Weight',
-      education: 'Education',
-      job: 'Job',
-      relationship: 'Relationship',
-      tags: 'Tags'
+      none: 'Empty',
+      following: 'Following',
+      followers: 'Followers',
+      views: 'Views',
+      reputation: 'Reputation',
+      chat: 'Chat',
+      follow: 'Follow',
+      followed: 'Following',
+      backHome: 'Back home',
+      noBio: 'No bio yet.',
+      emptyNotes: 'No notes yet.',
+      emptyReviews: 'No reviews yet.',
+      writeReview: 'Review',
+      reviewPlaceholder: 'Write a real impression.',
+      submitReview: 'Post',
+      updateReview: 'Update',
+      needLogin: 'Please log in first',
+      cannotReview: 'Review is not available yet.',
+      reviewFail: 'Review failed'
     }
   };
 
   var state = {
     root: null,
-    user: {},
-    activeTab: 'comments',
-    commentsLoaded: false,
-    commentsLoading: false,
-    commentsError: '',
+    profile: null,
     comments: [],
     viewerComment: null,
     averageRating: 0,
     ratingCount: 0,
     currentRating: 5,
-    topicsLoaded: false,
-    topicsLoading: false,
-    topicsError: '',
+    activeTab: 'home',
+    editing: false,
     topics: []
   };
 
-  function langKey() {
-    var raw = String((window.config && (config.userLang || config.defaultLang)) || navigator.language || 'zh').toLowerCase();
-    return raw.indexOf('zh') === 0 ? 'zh' : 'en';
-  }
-
-  function t(key) {
-    return (TEXTS[langKey()] && TEXTS[langKey()][key]) || TEXTS.zh[key] || key;
+  function lang() {
+    var code = String((window.config && config.userLang) || navigator.language || 'zh').toLowerCase();
+    return code.indexOf('zh') === 0 ? TEXT.zh : TEXT.en;
   }
 
   function $(sel, root) { return (root || document).querySelector(sel); }
   function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
-  function norm(v) { return String(v || '').replace(/\s+/g, ' ').trim(); }
-  function esc(s) { return String(s || '').replace(/[&<>'"]/g, function (ch) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[ch]; }); }
-  function stripHtml(s) { return String(s || '').replace(/<[^>]*>/g, '').trim(); }
-
+  function norm(v) { return String(v == null ? '' : v).replace(/\s+/g, ' ').trim(); }
+  function esc(v) {
+    return String(v == null ? '' : v).replace(/[&<>'"]/g, function (ch) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[ch];
+    });
+  }
   function rel(path) {
     var base = window.config && window.config.relative_path || '';
     if (!path) return base || '';
@@ -134,11 +172,15 @@
     if (base && path.indexOf(base + '/') === 0) return path;
     return base + path;
   }
-
   function csrfToken() {
     return window.config && (window.config.csrf_token || window.config.csrfToken) ||
-      ($('meta[name="csrf-token"]') && $('meta[name="csrf-token"]').getAttribute('content')) || '';
+      (document.querySelector('meta[name="csrf-token"]') && document.querySelector('meta[name="csrf-token"]').getAttribute('content')) ||
+      '';
   }
+  function currentUser() { return window.app && window.app.user || {}; }
+  function currentUid() { return Number(currentUser().uid || 0); }
+  function alertOk(msg) { if (window.app && app.alertSuccess) app.alertSuccess(msg); else console.log(msg); }
+  function alertErr(msg) { if (window.app && app.alertError) app.alertError(msg); else alert(msg); }
 
   function apiFetch(url, options) {
     options = options || {};
@@ -150,7 +192,6 @@
           var msg = json.error || json.message || json.status && json.status.message || ('HTTP ' + res.status);
           var err = new Error(msg);
           err.status = res.status;
-          err.payload = json;
           throw err;
         }
         return json.response || json;
@@ -158,521 +199,678 @@
     });
   }
 
-  function getPathSlug() {
-    var m = location.pathname.match(/\/user\/([^\/?#]+)/i);
-    return m ? decodeURIComponent(m[1]) : '';
+  function slugFromPath() {
+    var parts = location.pathname.split('/').filter(Boolean);
+    return parts[0] === 'user' ? decodeURIComponent(parts[1] || '') : '';
+  }
+  function tabFromPath() {
+    var p = location.pathname.split('/').filter(Boolean)[2] || '';
+    if (p === 'topics') return 'notes';
+    if (p === 'about') return 'info';
+    return 'home';
+  }
+  function isOwn() {
+    var p = state.profile || {};
+    var me = currentUser();
+    if (!me || !p) return false;
+    if (Number(me.uid || 0) && Number(p.uid || 0) && Number(me.uid) === Number(p.uid)) return true;
+    var s = String(p.userslug || p.username || '').toLowerCase();
+    return s && (s === String(me.userslug || '').toLowerCase() || s === String(me.username || '').toLowerCase());
   }
 
-  function getPathTab(defaultTab) {
-    if (/\/topics(?:[/?#]|$)/i.test(location.pathname)) return 'topics';
-    if (/\/about(?:[/?#]|$)/i.test(location.pathname)) return 'profile';
-    return defaultTab || 'comments';
-  }
-
-  function dataFromAjaxify() {
-    var d = (window.ajaxify && window.ajaxify.data) || {};
-    if (d.user && (d.user.uid || d.user.username || d.user.userslug)) return d.user;
-    return d || {};
-  }
-
-  function cleanTemplateValue(v) {
-    v = String(v || '').trim();
-    if (/^\{.+\}$/.test(v)) return '';
-    return v;
-  }
-
-  function mergeUser(base, next) {
-    base = base || {};
-    next = next || {};
-    var out = Object.assign({}, base);
-    Object.keys(next).forEach(function (k) {
-      if (next[k] !== undefined && next[k] !== null && String(next[k]) !== '') out[k] = next[k];
-    });
-    return out;
-  }
-
-  function collectInitialUser(root) {
-    var ajaxUser = dataFromAjaxify();
-    var attrUser = {
-      uid: cleanTemplateValue(root.getAttribute('data-uid')),
-      userslug: cleanTemplateValue(root.getAttribute('data-userslug')) || getPathSlug(),
-      username: cleanTemplateValue(root.getAttribute('data-username')) || getPathSlug(),
-      picture: cleanTemplateValue(root.getAttribute('data-picture')),
-      aboutme: cleanTemplateValue(root.getAttribute('data-about'))
-    };
-    return mergeUser(attrUser, ajaxUser);
-  }
-
-  function currentUid() { return Number(window.app && app.user && app.user.uid || 0); }
-  function isOwnProfile() { return currentUid() && Number(state.user && state.user.uid || 0) === currentUid(); }
-  function userSlug() { return state.user && (state.user.userslug || state.user.slug || state.user.username) || getPathSlug(); }
-
-  function avatarUrl(user) { return user && (user.picture || user.uploadedpicture || user.avatar) || ''; }
-  function coverUrl(user) { return user && (user['cover:url'] || user.coverUrl || user.cover || '') || ''; }
-
-  function displayName(user) { return norm(user && (user.displayname || user.fullname || user.username || user.userslug)) || getPathSlug() || 'User'; }
-
-  function firstLetter(user) {
-    var txt = norm(user && (user['icon:text'] || user.username || user.userslug || displayName(user))) || '?';
-    return txt.charAt(0).toUpperCase();
+  function normalizeProfile(raw) {
+    raw = raw || {};
+    var ajax = window.ajaxify && window.ajaxify.data || {};
+    var u = ajax.user || ajax || {};
+    var root = state.root;
+    return Object.assign({
+      uid: raw.uid || u.uid || Number(root && root.dataset.uid || 0),
+      username: raw.username || u.username || root && root.dataset.username || slugFromPath(),
+      userslug: raw.userslug || u.userslug || root && root.dataset.userslug || slugFromPath(),
+      displayname: raw.displayname || raw.fullname || u.displayname || u.fullname || u.username || root && root.dataset.username || slugFromPath(),
+      picture: raw.avatar || raw.peipe_xhs_avatar || raw.picture || raw.uploadedpicture || u.picture || u.uploadedpicture || root && root.dataset.picture || '',
+      cover: raw.cover || raw.peipe_xhs_cover || raw['cover:url'] || u['cover:url'] || '',
+      bio: raw.bio || raw.peipe_partner_bio || raw.aboutme || raw.signature || u.aboutme || u.signature || root && root.dataset.about || '',
+      country: raw.country || raw.peipe_partner_country || u.country || u.location || u.language_flag || '',
+      gender: raw.gender || raw.peipe_partner_gender || u.gender || '',
+      birthday: raw.birthday || raw.peipe_partner_birthday || u.birthday || '',
+      nativeLanguages: normalizeArray(raw.nativeLanguages || raw.language_fluent || raw.native_language || raw.language_native || u.language_fluent || u.native_language || u.language_native),
+      learningLanguages: normalizeArray(raw.learningLanguages || raw.language_learning || raw.learning_language || raw.language_target || u.language_learning || u.learning_language || u.language_target),
+      occupation: raw.occupation || raw.peipe_partner_occupation || u.occupation || '',
+      relationship: raw.relationship || raw.peipe_partner_relationship || u.relationship || '',
+      height: raw.height || raw.peipe_partner_height || u.height || '',
+      weight: raw.weight || raw.peipe_partner_weight || u.weight || '',
+      reputation: raw.reputation || u.reputation || 0,
+      followingCount: raw.followingCount || raw.following || u.followingCount || u.following || 0,
+      followerCount: raw.followerCount || raw.followers || u.followerCount || u.followers || 0,
+      profileviews: raw.profileviews || raw.views || u.profileviews || 0,
+      topiccount: raw.topiccount || u.topiccount || 0,
+      postcount: raw.postcount || u.postcount || 0
+    }, raw);
   }
 
   function normalizeArray(v) {
     if (Array.isArray(v)) return v.map(norm).filter(Boolean);
-    var s = String(v || '').trim();
-    if (!s || s === '[]' || s === 'null') return [];
+    var s = norm(v);
+    if (!s || s === '[]') return [];
     try {
-      var parsed = JSON.parse(s);
-      if (Array.isArray(parsed)) return parsed.map(norm).filter(Boolean);
+      var p = JSON.parse(s);
+      if (Array.isArray(p)) return p.map(norm).filter(Boolean);
     } catch (e) {}
-    return s.split(/[,，、|\/]+/).map(norm).filter(Boolean);
+    return s.split(/[,\u3001\/|]+/).map(norm).filter(Boolean);
   }
 
-  function languageCode(v) {
-    var r = norm(v).toLowerCase();
-    var map = {
-      '中文': 'ZH', '汉语': 'ZH', '普通话': 'ZH', 'chinese': 'ZH', 'mandarin': 'ZH', 'zh': 'ZH', 'cn': 'CN',
-      '英语': 'EN', '英文': 'EN', 'english': 'EN', 'en': 'EN',
-      '缅甸语': 'MY', '缅语': 'MY', 'burmese': 'MY', 'myanmar': 'MY', 'my': 'MY', 'mm': 'MM',
-      '泰语': 'TH', 'thai': 'TH', 'th': 'TH',
-      '越南语': 'VI', 'vietnamese': 'VI', 'vi': 'VI', 'vn': 'VN',
-      '日语': 'JA', 'japanese': 'JA', 'ja': 'JA', 'jp': 'JP',
-      '韩语': 'KO', 'korean': 'KO', 'ko': 'KO', 'kr': 'KR',
-      '法语': 'FR', 'french': 'FR', 'fr': 'FR',
-      '德语': 'DE', 'german': 'DE', 'de': 'DE',
-      '西班牙语': 'ES', 'spanish': 'ES', 'es': 'ES',
-      '老挝语': 'LO', 'lao': 'LO', 'lo': 'LO',
-      '高棉语': 'KM', 'khmer': 'KM', 'km': 'KM',
-      '马来语': 'MS', 'malay': 'MS', 'ms': 'MS',
-      '菲律宾语': 'TL', 'tagalog': 'TL', 'tl': 'TL'
-    };
-    if (map[r]) return map[r];
-    if (/^[a-z]{2,4}$/i.test(r)) return r.toUpperCase();
-    return norm(v).slice(0, 4).toUpperCase();
-  }
-
-  function languages(user) {
-    var native = [].concat(
-      normalizeArray(user.peipe_partner_native_languages),
-      normalizeArray(user.language_fluent),
-      normalizeArray(user.native_language),
-      normalizeArray(user.language_native)
-    );
-    var learn = [].concat(
-      normalizeArray(user.peipe_partner_learning_languages),
-      normalizeArray(user.language_learning),
-      normalizeArray(user.learning_language),
-      normalizeArray(user.language_target)
-    );
-    native = uniq(native.map(languageCode).filter(Boolean)).slice(0, 3);
-    learn = uniq(learn.map(languageCode).filter(Boolean)).slice(0, 5);
-    return { native: native, learn: learn };
-  }
-
-  function uniq(arr) { return Array.from(new Set(arr)); }
-
-  function birthdayAge(user) {
-    var direct = user.age || user.peipe_partner_age;
-    if (direct && Number(direct) > 0) return String(direct);
-    var b = user.birthday || user.peipe_partner_birthday || user.birthdate;
-    if (!b) return '';
-    var date = new Date(b);
-    if (isNaN(date.getTime())) return '';
+  function ageFromBirthday(birthday) {
+    if (!birthday) return '';
+    var d = new Date(birthday);
+    if (!d || isNaN(d.getTime())) return '';
     var now = new Date();
-    var age = now.getFullYear() - date.getFullYear();
-    var m = now.getMonth() - date.getMonth();
-    if (m < 0 || (m === 0 && now.getDate() < date.getDate())) age -= 1;
+    var age = now.getFullYear() - d.getFullYear();
+    var m = now.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age -= 1;
     return age > 0 && age < 120 ? String(age) : '';
   }
 
-  function genderInfo(user) {
-    var g = norm(user.gender || user.peipe_partner_gender).toLowerCase();
-    if (g === 'male' || g === 'm' || g === '男') return { text: t('male'), symbol: '♂', cls: 'male' };
-    if (g === 'female' || g === 'f' || g === '女') return { text: t('female'), symbol: '♀', cls: 'female' };
-    if (g) return { text: t('secret'), symbol: '•', cls: 'secret' };
-    return null;
-  }
-
-  function flagForCountry(raw) {
-    raw = norm(raw).toLowerCase();
-    if (!raw) return '';
+  function countryFlag(country) {
+    var s = String(country || '').toLowerCase();
     var pairs = [
       ['中国', '🇨🇳'], ['china', '🇨🇳'], ['cn', '🇨🇳'],
       ['缅甸', '🇲🇲'], ['myanmar', '🇲🇲'], ['burma', '🇲🇲'], ['mm', '🇲🇲'],
       ['越南', '🇻🇳'], ['vietnam', '🇻🇳'], ['vn', '🇻🇳'],
       ['泰国', '🇹🇭'], ['thailand', '🇹🇭'], ['th', '🇹🇭'],
-      ['美国', '🇺🇸'], ['usa', '🇺🇸'], ['us', '🇺🇸'], ['united states', '🇺🇸'],
-      ['英国', '🇬🇧'], ['uk', '🇬🇧'], ['gb', '🇬🇧'], ['united kingdom', '🇬🇧'],
+      ['美国', '🇺🇸'], ['usa', '🇺🇸'], ['united states', '🇺🇸'], ['us', '🇺🇸'],
+      ['英国', '🇬🇧'], ['uk', '🇬🇧'], ['united kingdom', '🇬🇧'],
       ['日本', '🇯🇵'], ['japan', '🇯🇵'], ['jp', '🇯🇵'],
       ['韩国', '🇰🇷'], ['korea', '🇰🇷'], ['kr', '🇰🇷'],
-      ['老挝', '🇱🇦'], ['laos', '🇱🇦'], ['la', '🇱🇦'],
-      ['柬埔寨', '🇰🇭'], ['cambodia', '🇰🇭'], ['kh', '🇰🇭'],
-      ['马来西亚', '🇲🇾'], ['malaysia', '🇲🇾'], ['my', '🇲🇾'],
-      ['菲律宾', '🇵🇭'], ['philippines', '🇵🇭'], ['ph', '🇵🇭'],
-      ['新加坡', '🇸🇬'], ['singapore', '🇸🇬'], ['sg', '🇸🇬']
+      ['老挝', '🇱🇦'], ['laos', '🇱🇦'],
+      ['柬埔寨', '🇰🇭'], ['cambodia', '🇰🇭'],
+      ['马来西亚', '🇲🇾'], ['malaysia', '🇲🇾'],
+      ['菲律宾', '🇵🇭'], ['philippines', '🇵🇭']
     ];
     for (var i = 0; i < pairs.length; i += 1) {
-      if (raw === pairs[i][0] || raw.indexOf(pairs[i][0]) !== -1) return pairs[i][1];
+      if (s === pairs[i][0] || s.indexOf(pairs[i][0]) !== -1) return pairs[i][1];
     }
     return '';
   }
 
-  function userCountry(user) { return norm(user.peipe_partner_country || user.country || user.nationality || user.language_flag || user.location); }
+  function langCode(v) {
+    var s = norm(v).toLowerCase();
+    var map = {
+      '中文': 'CN', '汉语': 'CN', '普通话': 'CN', 'chinese': 'CN', 'mandarin': 'CN', 'zh': 'CN', 'cn': 'CN',
+      '英语': 'EN', '英文': 'EN', 'english': 'EN', 'en': 'EN',
+      '缅甸语': 'MM', '缅语': 'MM', 'burmese': 'MM', 'myanmar': 'MM', 'my': 'MM', 'mm': 'MM',
+      '泰语': 'TH', 'thai': 'TH', 'th': 'TH',
+      '越南语': 'VN', 'vietnamese': 'VN', 'vi': 'VN', 'vn': 'VN',
+      '日语': 'JP', 'japanese': 'JP', 'ja': 'JP', 'jp': 'JP',
+      '韩语': 'KR', 'korean': 'KR', 'ko': 'KR', 'kr': 'KR',
+      '老挝语': 'LA', 'lao': 'LA',
+      '高棉语': 'KM', 'khmer': 'KM',
+      '马来语': 'MS', 'malay': 'MS',
+      '菲律宾语': 'TL', 'tagalog': 'TL'
+    };
+    if (map[s]) return map[s];
+    if (/^[a-z]{2,4}$/i.test(s)) return s.toUpperCase();
+    return norm(v).slice(0, 3).toUpperCase();
+  }
 
-  function statValue(user, keys) {
-    for (var i = 0; i < keys.length; i += 1) {
-      var v = user[keys[i]];
-      if (v !== undefined && v !== null && String(v) !== '') return v;
-    }
-    return 0;
+  function languagePair(profile) {
+    var a = (profile.nativeLanguages || []).map(langCode).filter(Boolean).slice(0, 2);
+    var b = (profile.learningLanguages || []).map(langCode).filter(Boolean).slice(0, 5);
+    if (!a.length && !b.length) return '';
+    if (!a.length) return b.join(' ');
+    if (!b.length) return a.join(' ');
+    return a.join(' ') + ' ⇄ ' + b.join(' ');
+  }
+
+  function genderIcon(gender) {
+    var g = norm(gender).toLowerCase();
+    if (g === 'male' || g === 'm' || g === '男') return '<span class="pxp-sex pxp-sex-m">♂</span>';
+    if (g === 'female' || g === 'f' || g === '女') return '<span class="pxp-sex pxp-sex-f">♀</span>';
+    return '<span class="pxp-sex pxp-sex-s">⚥</span>';
   }
 
   function renderStars(value, editable) {
     value = Math.max(0, Math.min(5, Number(value || 0)));
-    var html = '<div class="peipe-stars' + (editable ? ' is-editable' : '') + '">';
+    var out = '<div class="pxp-stars' + (editable ? ' is-editable' : '') + '">';
     for (var i = 1; i <= 5; i += 1) {
-      html += '<button type="button" class="peipe-star' + (i <= value ? ' active' : '') + '" data-rating="' + i + '"' + (editable ? '' : ' disabled') + '>★</button>';
+      out += '<button type="button" class="pxp-star' + (i <= value ? ' active' : '') + '" data-rating="' + i + '"' + (editable ? '' : ' disabled') + '>★</button>';
     }
-    return html + '</div>';
-  }
-
-  function renderLangLine(user) {
-    var l = languages(user);
-    if (!l.native.length && !l.learn.length) return '';
-    var left = l.native.join(' ');
-    var right = l.learn.join(' ');
-    return '<div class="peipe-language-line"><span>' + esc(left || t('nativeLang')) + '</span><i>⇄</i><span>' + esc(right || t('learningLang')) + '</span></div>';
-  }
-
-  function profileRows(user) {
-    var rows = [];
-    var country = userCountry(user);
-    if (country) rows.push([t('country'), (flagForCountry(country) ? flagForCountry(country) + ' ' : '') + country]);
-    var g = genderInfo(user);
-    if (g) rows.push(['性别', g.symbol + ' ' + g.text]);
-    var age = birthdayAge(user);
-    if (age) rows.push(['年龄', age + '岁']);
-    var height = user.peipe_partner_height || user.height;
-    if (height) rows.push([t('height'), height + 'cm']);
-    var weight = user.peipe_partner_weight || user.weight;
-    if (weight) rows.push([t('weight'), weight + 'kg']);
-    var edu = user.peipe_partner_education || user.education;
-    if (edu) rows.push([t('education'), edu]);
-    var job = user.peipe_partner_job || user.job || user.occupation;
-    if (job) rows.push([t('job'), job]);
-    var rels = user.peipe_partner_relationship || user.relationship;
-    if (rels) rows.push([t('relationship'), rels]);
-    return rows;
-  }
-
-  function tags(user) {
-    return uniq([].concat(normalizeArray(user.peipe_partner_tags), normalizeArray(user.tags), normalizeArray(user.interests))).slice(0, 12);
-  }
-
-  function renderHeader() {
-    var user = state.user || {};
-    var avatar = avatarUrl(user);
-    var cover = coverUrl(user);
-    var country = userCountry(user);
-    var flag = flagForCountry(country);
-    var g = genderInfo(user);
-    var age = birthdayAge(user);
-    var bio = stripHtml(user.aboutme || user.bio || user.signature || state.root.getAttribute('data-about')) || '';
-    var coverStyle = cover ? ' style="background-image:url(' + esc(cover) + ')"' : '';
-
-    return '' +
-      '<section class="peipe-xhs-hero">' +
-        '<div class="peipe-xhs-cover"' + coverStyle + '></div>' +
-        '<div class="peipe-xhs-shade"></div>' +
-        '<div class="peipe-xhs-card">' +
-          '<div class="peipe-xhs-main">' +
-            '<div class="peipe-xhs-avatar">' +
-              (avatar ? '<img src="' + esc(avatar) + '" alt="">' : '<span>' + esc(firstLetter(user)) + '</span>') +
-              (flag ? '<em>' + flag + '</em>' : '') +
-            '</div>' +
-            '<div class="peipe-xhs-info">' +
-              '<h1>' + esc(displayName(user)) + '</h1>' +
-              '<div class="peipe-xhs-slug">@' + esc(user.userslug || user.username || getPathSlug()) + '</div>' +
-              '<div class="peipe-xhs-mini">' +
-                (g ? '<span class="gender ' + g.cls + '">' + g.symbol + '</span>' : '') +
-                (age ? '<span>' + esc(age + '岁') + '</span>' : '') +
-                (country ? '<span>' + esc(country) + '</span>' : '') +
-              '</div>' +
-              renderLangLine(user) +
-            '</div>' +
-          '</div>' +
-          '<div class="peipe-xhs-stats">' +
-            '<div><b>' + esc(statValue(user, ['reputation'])) + '</b><span>' + t('reputation') + '</span></div>' +
-            '<div><b>' + esc(statValue(user, ['topiccount', 'topics'])) + '</b><span>' + t('topics') + '</span></div>' +
-            '<div><b>' + esc(statValue(user, ['postcount', 'posts'])) + '</b><span>' + t('postsCount') + '</span></div>' +
-            '<div><b>' + esc(statValue(user, ['followerCount', 'followers', 'followersCount'])) + '</b><span>' + t('followers') + '</span></div>' +
-          '</div>' +
-          '<p class="peipe-xhs-bio">' + esc(bio || t('bioEmpty')) + '</p>' +
-        '</div>' +
-      '</section>';
-  }
-
-  function renderTabs() {
-    var tabs = [
-      ['comments', t('comments'), '/user/' + encodeURIComponent(userSlug())],
-      ['topics', t('posts'), '/user/' + encodeURIComponent(userSlug()) + '/topics'],
-      ['profile', t('profile'), '/user/' + encodeURIComponent(userSlug()) + '/about']
-    ];
-    return '<nav class="peipe-profile-tabs">' + tabs.map(function (tab) {
-      return '<button type="button" class="' + (state.activeTab === tab[0] ? 'active' : '') + '" data-tab="' + tab[0] + '" data-url="' + esc(rel(tab[2])) + '">' + esc(tab[1]) + '</button>';
-    }).join('') + '</nav>';
-  }
-
-  function renderRatingSummary() {
-    return '' +
-      '<section class="peipe-rating-summary">' +
-        '<div class="peipe-rating-number">' + Number(state.averageRating || 0).toFixed(1) + '</div>' +
-        '<div class="peipe-rating-side">' +
-          renderStars(Math.round(state.averageRating || 0), false) +
-          '<span>' + Number(state.ratingCount || 0) + ' ' + t('scorePeople') + '</span>' +
-        '</div>' +
-      '</section>';
-  }
-
-  function renderCommentComposer() {
-    var targetUid = Number(state.user && state.user.uid || 0);
-    if (!currentUid()) return '<div class="peipe-note-card">' + t('loginToReview') + '</div>';
-    if (!targetUid || isOwnProfile()) return '<div class="peipe-note-card">' + t('ownProfileNote') + '</div>';
-    var old = state.viewerComment || {};
-    var rating = Number(old.rating || state.currentRating || 5);
-    return '' +
-      '<section class="peipe-comment-compose">' +
-        '<div class="peipe-compose-title">' + t('writeReview') + '</div>' +
-        renderStars(rating, true) +
-        '<textarea class="peipe-comment-input" maxlength="120" placeholder="' + esc(t('reviewPlaceholder')) + '">' + esc(old.content || '') + '</textarea>' +
-        '<button type="button" class="peipe-comment-submit">' + (old.id ? t('updateReview') : t('submitReview')) + '</button>' +
-        '<div class="peipe-comment-hint"></div>' +
-      '</section>';
-  }
-
-  function renderCommentItem(item) {
-    var avatar = item.authorAvatar || item.picture || '';
-    var name = item.authorName || item.username || 'User';
-    return '' +
-      '<article class="peipe-comment-item">' +
-        '<div class="peipe-comment-avatar">' + (avatar ? '<img src="' + esc(avatar) + '" alt="">' : '<span>' + esc(String(name).charAt(0).toUpperCase()) + '</span>') + '</div>' +
-        '<div class="peipe-comment-body">' +
-          '<div class="peipe-comment-head"><b>' + esc(name) + '</b>' + renderStars(item.rating || 0, false) + '</div>' +
-          '<p>' + esc(item.content || '') + '</p>' +
-        '</div>' +
-      '</article>';
-  }
-
-  function renderCommentsTab() {
-    var body = '';
-    if (state.commentsLoading) body = '<div class="peipe-note-card">' + t('loadingComments') + '</div>';
-    else if (state.commentsError) body = '<div class="peipe-note-card is-error">' + esc(state.commentsError) + '</div>';
-    else if (!state.comments.length) body = '<div class="peipe-note-card">' + t('noComments') + '</div>';
-    else body = '<section class="peipe-comments-list">' + state.comments.map(renderCommentItem).join('') + '</section>';
-    return renderRatingSummary() + renderCommentComposer() + body;
-  }
-
-  function renderProfileTab() {
-    var user = state.user || {};
-    var rows = profileRows(user);
-    var tagList = tags(user);
-    var lang = languages(user);
-    var html = '<section class="peipe-profile-info-card"><h2>' + t('partnerInfo') + '</h2>';
-    html += '<div class="peipe-profile-grid">';
-    if (lang.native.length) html += '<div><span>' + t('nativeLang') + '</span><b>' + esc(lang.native.join(' / ')) + '</b></div>';
-    if (lang.learn.length) html += '<div><span>' + t('learningLang') + '</span><b>' + esc(lang.learn.join(' / ')) + '</b></div>';
-    rows.forEach(function (r) { html += '<div><span>' + esc(r[0]) + '</span><b>' + esc(r[1]) + '</b></div>'; });
-    html += '</div>';
-    if (tagList.length) {
-      html += '<h3>' + t('tags') + '</h3><div class="peipe-profile-tags">' + tagList.map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('') + '</div>';
-    }
-    html += '</section>';
-    return html;
-  }
-
-  function topicListFromPayload(json) {
-    if (!json) return [];
-    if (Array.isArray(json.topics)) return json.topics;
-    if (json.user && Array.isArray(json.user.topics)) return json.user.topics;
-    if (json.response && Array.isArray(json.response.topics)) return json.response.topics;
-    if (Array.isArray(json)) return json;
-    return [];
-  }
-
-  function renderTopicsTab() {
-    if (state.topicsLoading) return '<div class="peipe-note-card">' + t('topicsLoading') + '</div>';
-    if (state.topicsError) return '<div class="peipe-note-card is-error">' + t('topicsFail') + ' <a href="' + rel('/user/' + encodeURIComponent(userSlug()) + '/topics') + '">' + t('openOriginal') + '</a></div>';
-    if (!state.topics.length) return '<div class="peipe-note-card">' + t('topicsEmpty') + '</div>';
-    return '<section class="peipe-topic-grid">' + state.topics.map(function (topic) {
-      var title = topic.titleRaw || topic.title || topic.topicTitle || 'Untitled';
-      var url = topic.slug ? '/topic/' + topic.slug : (topic.tid ? '/topic/' + topic.tid : '#');
-      var teaser = stripHtml(topic.teaser && topic.teaser.content || topic.content || topic.mainPost && topic.mainPost.content || '');
-      var img = '';
-      var m = String(topic.content || topic.mainPost && topic.mainPost.content || '').match(/<img[^>]+src=["']([^"']+)/i);
-      if (m) img = m[1];
-      return '<a class="peipe-topic-card" href="' + rel(url) + '">' + (img ? '<img src="' + esc(img) + '" alt="">' : '<div class="peipe-topic-empty-img"></div>') + '<b>' + esc(title) + '</b>' + (teaser ? '<p>' + esc(teaser.slice(0, 70)) + '</p>' : '') + '</a>';
-    }).join('') + '</section>';
+    return out + '</div>';
   }
 
   function render() {
-    if (!state.root) return;
-    state.root.innerHTML = '<div class="peipe-profile-shell">' + renderHeader() + renderTabs() + '<main class="peipe-profile-content">' + (state.activeTab === 'comments' ? renderCommentsTab() : (state.activeTab === 'topics' ? renderTopicsTab() : renderProfileTab())) + '</main></div>';
-    bindUi();
+    var t = lang();
+    var p = state.profile || normalizeProfile({});
+    var cover = p.cover || '';
+    var avatar = p.picture || '';
+    var flag = countryFlag(p.country);
+    var age = p.age || ageFromBirthday(p.birthday);
+    var pair = languagePair(p);
+    var own = isOwn();
+
+    document.body.classList.add('peipe-xhs-active');
+    state.root.innerHTML = '' +
+      '<main class="pxp-page">' +
+        '<section class="pxp-hero">' +
+          '<div class="pxp-cover" style="' + (cover ? 'background-image:url(' + cssUrl(cover) + ')' : '') + '"></div>' +
+          '<div class="pxp-cover-shade"></div>' +
+          '<button type="button" class="pxp-more-btn" aria-label="more">•••</button>' +
+          '<div class="pxp-menu" hidden>' +
+            (own ? '<button type="button" data-action="avatar">' + esc(t.uploadAvatar) + '</button><button type="button" data-action="cover">' + esc(t.uploadCover) + '</button><button type="button" data-action="edit">' + esc(t.edit) + '</button>' : '') +
+          '</div>' +
+          '<div class="pxp-hero-content">' +
+            '<div class="pxp-top-row">' +
+              '<div class="pxp-avatar-wrap">' +
+                '<div class="pxp-avatar">' + (avatar ? '<img src="' + esc(avatar) + '" alt="">' : '<span>' + esc((p.displayname || p.username || '?').slice(0, 1).toUpperCase()) + '</span>') + '</div>' +
+                (flag ? '<span class="pxp-flag">' + flag + '</span>' : '') +
+                (own ? '<button type="button" class="pxp-avatar-plus" data-action="avatar">📷</button>' : '') +
+              '</div>' +
+              '<div class="pxp-title-block">' +
+                '<div class="pxp-name-line"><h1>' + esc(p.displayname || p.username || p.userslug) + '</h1>' + (age || p.gender ? '<span class="pxp-age-chip">' + genderIcon(p.gender) + (age ? '<b>' + esc(age) + '岁</b>' : '') + '</span>' : '') + '</div>' +
+                '<div class="pxp-handle">@' + esc(p.userslug || p.username || '') + '</div>' +
+                (pair ? '<div class="pxp-lang">' + esc(pair).replace('⇄', '<span>⇄</span>') + '</div>' : '') +
+                (p.country ? '<div class="pxp-location">📍 ' + esc(p.country) + '</div>' : '') +
+              '</div>' +
+            '</div>' +
+            '<p class="pxp-bio">' + esc(norm(p.bio) || t.noBio) + '</p>' +
+            '<div class="pxp-stats">' +
+              '<div><b>' + esc(p.followingCount || 0) + '</b><span>' + esc(t.following) + '</span></div>' +
+              '<div><b>' + esc(p.followerCount || 0) + '</b><span>' + esc(t.followers) + '</span></div>' +
+              '<div><b>' + esc(p.profileviews || 0) + '</b><span>' + esc(t.views) + '</span></div>' +
+            '</div>' +
+            '<div class="pxp-actions">' +
+              (own ? '<button type="button" class="pxp-primary" data-action="edit">' + esc(t.edit) + '</button>' : '<button type="button" class="pxp-primary" data-action="chat">' + esc(t.chat) + '</button>') +
+            '</div>' +
+          '</div>' +
+        '</section>' +
+        '<nav class="pxp-tabs">' +
+          tabButton('home', t.home) +
+          tabButton('notes', t.notes) +
+          tabButton('reviews', t.reviews) +
+          tabButton('info', t.info) +
+        '</nav>' +
+        '<section class="pxp-content">' + renderTabContent() + '</section>' +
+      '</main>';
+
+    bindEvents();
   }
 
-  function bindUi() {
-    $$('.peipe-profile-tabs button', state.root).forEach(function (btn) {
+  function tabButton(key, label) {
+    return '<button type="button" class="' + (state.activeTab === key ? 'active' : '') + '" data-tab="' + key + '">' + esc(label) + '</button>';
+  }
+
+  function renderTabContent() {
+    if (state.editing) return renderEditForm();
+    if (state.activeTab === 'notes') return renderNotes();
+    if (state.activeTab === 'reviews') return renderReviews();
+    if (state.activeTab === 'info') return renderInfo();
+    return renderHome();
+  }
+
+  function renderHome() {
+    var p = state.profile || {};
+    var t = lang();
+    return '<div class="pxp-card pxp-home-card">' +
+      '<h2>' + esc(t.info) + '</h2>' +
+      '<div class="pxp-info-grid">' +
+        infoItem(t.nativeLang, (p.nativeLanguages || []).map(langCode).join(' / ') || t.none) +
+        infoItem(t.learnLang, (p.learningLanguages || []).map(langCode).join(' / ') || t.none) +
+        infoItem(t.occupation, p.occupation || t.none) +
+        infoItem(t.relationship, p.relationship || t.none) +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderInfo() {
+    var p = state.profile || {};
+    var t = lang();
+    return '<div class="pxp-card"><h2>' + esc(t.info) + '</h2><div class="pxp-info-grid">' +
+      infoItem(t.country, (countryFlag(p.country) ? countryFlag(p.country) + ' ' : '') + (p.country || t.none)) +
+      infoItem(t.gender, genderLabel(p.gender)) +
+      infoItem(t.birthday, p.birthday || t.none) +
+      infoItem(t.height, p.height ? p.height + ' cm' : t.none) +
+      infoItem(t.weight, p.weight ? p.weight + ' kg' : t.none) +
+      infoItem(t.occupation, p.occupation || t.none) +
+      infoItem(t.relationship, p.relationship || t.none) +
+      infoItem(t.nativeLang, (p.nativeLanguages || []).join(' / ') || t.none) +
+      infoItem(t.learnLang, (p.learningLanguages || []).join(' / ') || t.none) +
+      '</div></div>';
+  }
+
+  function genderLabel(g) {
+    var t = lang();
+    var s = norm(g).toLowerCase();
+    if (s === 'male' || s === 'm' || s === '男') return t.male;
+    if (s === 'female' || s === 'f' || s === '女') return t.female;
+    return t.secret;
+  }
+
+  function infoItem(label, value) {
+    return '<div class="pxp-info-item"><span>' + esc(label) + '</span><b>' + esc(value) + '</b></div>';
+  }
+
+  function renderNotes() {
+    var t = lang();
+    var topics = state.topics || getAjaxTopics();
+    if (!topics.length) return '<div class="pxp-card pxp-empty">' + esc(t.emptyNotes) + '</div>';
+    return '<div class="pxp-notes-grid">' + topics.map(function (it) {
+      var title = it.title || it.topic && it.topic.title || '笔记';
+      var teaser = it.teaser || it.content || it.topic && it.topic.teaser || '';
+      var href = it.slug ? rel('/topic/' + it.slug) : (it.tid ? rel('/topic/' + it.tid) : '#');
+      var image = firstImage(teaser);
+      return '<a class="pxp-note" href="' + esc(href) + '">' +
+        '<div class="pxp-note-img" style="' + (image ? 'background-image:url(' + cssUrl(image) + ')' : '') + '"></div>' +
+        '<b>' + esc(title) + '</b><span>' + esc(stripHtml(teaser).slice(0, 36)) + '</span></a>';
+    }).join('') + '</div>';
+  }
+
+  function getAjaxTopics() {
+    var d = window.ajaxify && window.ajaxify.data || {};
+    var list = d.topics || d.posts || d.user && d.user.topics || [];
+    return Array.isArray(list) ? list : [];
+  }
+  function firstImage(html) {
+    var m = String(html || '').match(/<img[^>]+src=["']([^"']+)["']/i) || String(html || '').match(/!\[[^\]]*\]\(([^)]+)\)/);
+    return m ? m[1] : '';
+  }
+  function stripHtml(s) { return String(s || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim(); }
+
+  function renderReviews() {
+    var t = lang();
+    var p = state.profile || {};
+    var own = isOwn();
+    var canReview = currentUid() && !own;
+    var old = state.viewerComment || {};
+    return '<div class="pxp-card pxp-rating-card">' +
+      '<div class="pxp-rating-number">' + Number(state.averageRating || 0).toFixed(1) + '</div>' +
+      '<div>' + renderStars(Math.round(state.averageRating || 0), false) + '<span>' + Number(state.ratingCount || 0) + ' 人评分</span></div>' +
+    '</div>' +
+    (canReview ? '<div class="pxp-card pxp-review-compose"><h2>' + esc(t.writeReview) + '</h2>' + renderStars(Number(old.rating || state.currentRating || 5), true) +
+      '<textarea class="pxp-review-input" maxlength="120" placeholder="' + esc(t.reviewPlaceholder) + '">' + esc(old.content || '') + '</textarea>' +
+      '<button type="button" class="pxp-primary" data-action="review">' + esc(old.id ? t.updateReview : t.submitReview) + '</button></div>' : '') +
+    '<div class="pxp-review-list">' + ((state.comments || []).length ? state.comments.map(renderReviewItem).join('') : '<div class="pxp-card pxp-empty">' + esc(t.emptyReviews) + '</div>') + '</div>';
+  }
+
+  function renderReviewItem(item) {
+    return '<article class="pxp-review-item"><div class="pxp-review-avatar">' + (item.authorAvatar ? '<img src="' + esc(item.authorAvatar) + '" alt="">' : '') + '</div><div><div class="pxp-review-head"><b>' + esc(item.authorName || item.username || '用户') + '</b>' + renderStars(Number(item.rating || 0), false) + '</div><p>' + esc(item.content || '') + '</p></div></article>';
+  }
+
+  function renderEditForm() {
+    var t = lang();
+    var p = state.profile || {};
+    function input(name, label, value, type) {
+      return '<label><span>' + esc(label) + '</span><input name="' + esc(name) + '" type="' + (type || 'text') + '" value="' + esc(value || '') + '"></label>';
+    }
+    return '<form class="pxp-card pxp-edit-form">' +
+      '<h2>' + esc(t.edit) + '</h2>' +
+      input('displayname', t.name, p.displayname) +
+      '<label><span>' + esc(t.bio) + '</span><textarea name="bio" maxlength="160">' + esc(p.bio || '') + '</textarea></label>' +
+      input('country', t.country, p.country) +
+      '<label><span>' + esc(t.gender) + '</span><select name="gender">' +
+        '<option value="secret"' + selected(p.gender, 'secret') + '>' + esc(t.secret) + '</option>' +
+        '<option value="male"' + selected(p.gender, 'male') + '>' + esc(t.male) + '</option>' +
+        '<option value="female"' + selected(p.gender, 'female') + '>' + esc(t.female) + '</option>' +
+      '</select></label>' +
+      input('birthday', t.birthday, p.birthday, 'date') +
+      input('nativeLanguages', t.nativeLang, (p.nativeLanguages || []).join(',')) +
+      input('learningLanguages', t.learnLang, (p.learningLanguages || []).join(',')) +
+      input('occupation', t.occupation, p.occupation) +
+      input('relationship', t.relationship, p.relationship) +
+      input('height', t.height, p.height, 'number') +
+      input('weight', t.weight, p.weight, 'number') +
+      '<div class="pxp-edit-actions"><button type="button" class="pxp-secondary" data-action="cancel-edit">' + esc(t.cancel) + '</button><button type="submit" class="pxp-primary">' + esc(t.save) + '</button></div>' +
+    '</form>';
+  }
+  function selected(value, expected) { return String(value || '').toLowerCase() === expected ? ' selected' : ''; }
+
+  function cssUrl(url) { return '"' + String(url || '').replace(/[\\\"\n\r\f]/g, '\\$&') + '"'; }
+
+  function bindEvents() {
+    $$('.pxp-tabs button', state.root).forEach(function (btn) {
       btn.addEventListener('click', function () {
-        var tab = btn.getAttribute('data-tab') || 'comments';
-        state.activeTab = tab;
-        var url = btn.getAttribute('data-url');
-        if (url && history.pushState) history.pushState({}, '', url);
+        state.activeTab = btn.dataset.tab || 'home';
+        state.editing = false;
         render();
-        if (tab === 'topics' && !state.topicsLoaded && !state.topicsLoading) loadTopics();
-        if (tab === 'comments' && !state.commentsLoaded && !state.commentsLoading) loadComments();
       });
     });
 
-    $$('.peipe-comment-compose .peipe-star', state.root).forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        state.currentRating = Number(btn.getAttribute('data-rating') || 5);
-        var wrap = btn.closest('.peipe-stars');
-        $$('.peipe-star', wrap).forEach(function (star) {
-          star.classList.toggle('active', Number(star.getAttribute('data-rating') || 0) <= state.currentRating);
+    state.root.addEventListener('click', function (e) {
+      var act = e.target.closest('[data-action]');
+      if (!act) return;
+      var action = act.dataset.action;
+      if (action === 'avatar') chooseAndUpload('avatar');
+      if (action === 'cover') chooseAndUpload('cover');
+      if (action === 'edit') { state.editing = true; render(); }
+      if (action === 'cancel-edit') { state.editing = false; render(); }
+      if (action === 'review') submitReview();
+      if (action === 'chat') openChat();
+    });
+
+    var more = $('.pxp-more-btn', state.root);
+    var menu = $('.pxp-menu', state.root);
+    if (more && menu) {
+      more.addEventListener('click', function (e) {
+        e.stopPropagation();
+        menu.hidden = !menu.hidden;
+      });
+      document.addEventListener('click', function () { if (menu) menu.hidden = true; }, { once: true });
+    }
+
+    $$('.pxp-stars.is-editable .pxp-star', state.root).forEach(function (star) {
+      star.addEventListener('click', function () {
+        state.currentRating = Number(star.dataset.rating || 5);
+        $$('.pxp-stars.is-editable .pxp-star', state.root).forEach(function (s) {
+          s.classList.toggle('active', Number(s.dataset.rating || 0) <= state.currentRating);
         });
       });
     });
 
-    var submit = $('.peipe-comment-submit', state.root);
-    if (submit) submit.addEventListener('click', submitComment);
+    var form = $('.pxp-edit-form', state.root);
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        saveProfile(form);
+      });
+    }
   }
 
-  function handleCommentError(err) {
-    if (err && err.status === 404) return t('commentsApiMissing');
-    if (err && err.status === 403) return (err.message && err.message.indexOf('HTTP') !== 0 ? err.message : t('commentLocked')) || t('commentLocked');
-    return err && err.message ? err.message : t('commentFail');
+  function openChat() {
+    var slug = state.profile && state.profile.userslug || slugFromPath();
+    var nativeChat = document.querySelector('[component="account/chat"],[component="account/new-chat"]');
+    if (nativeChat) nativeChat.click();
+    else location.href = rel('/chats/' + encodeURIComponent(slug));
   }
 
-  function submitComment() {
-    var submit = $('.peipe-comment-submit', state.root);
-    var hint = $('.peipe-comment-hint', state.root);
-    var input = $('.peipe-comment-input', state.root);
-    var targetUid = Number(state.user && state.user.uid || 0);
+  function formValue(form, name) {
+    var el = form.elements[name];
+    return el ? norm(el.value) : '';
+  }
+
+  function saveProfile(form) {
+    var t = lang();
+    var payload = {
+      displayname: formValue(form, 'displayname'),
+      bio: formValue(form, 'bio'),
+      country: formValue(form, 'country'),
+      gender: formValue(form, 'gender') || 'secret',
+      birthday: formValue(form, 'birthday'),
+      nativeLanguages: normalizeArray(formValue(form, 'nativeLanguages')),
+      learningLanguages: normalizeArray(formValue(form, 'learningLanguages')),
+      occupation: formValue(form, 'occupation'),
+      relationship: formValue(form, 'relationship'),
+      height: formValue(form, 'height'),
+      weight: formValue(form, 'weight')
+    };
+    var btn = form.querySelector('button[type="submit"]');
+    if (btn) { btn.disabled = true; btn.textContent = t.saving; }
+
+    apiFetch('/api/peipe-partners/profile/me/card', {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json; charset=utf-8', 'x-csrf-token': csrfToken() },
+      body: JSON.stringify(payload)
+    }).then(function (json) {
+      state.profile = normalizeProfile(Object.assign({}, state.profile, json.profile || payload));
+      state.editing = false;
+      alertOk(t.saveOk);
+      render();
+    }).catch(function (err) {
+      alertErr(err.message || t.saveFail);
+    }).finally(function () {
+      if (btn) { btn.disabled = false; btn.textContent = t.save; }
+    });
+  }
+
+  function submitReview() {
+    var t = lang();
+    var p = state.profile || {};
+    var input = $('.pxp-review-input', state.root);
     var content = norm(input && input.value);
-    var rating = Math.max(1, Math.min(5, Number(state.currentRating || 5)));
-    if (!content) { if (hint) hint.textContent = t('reviewPlaceholder'); return; }
-    if (!targetUid) return;
-    submit.disabled = true;
-    submit.textContent = '...';
-    if (hint) hint.textContent = '';
-    apiFetch('/api/peipe-partners/profile/' + encodeURIComponent(targetUid) + '/comments', {
+    if (!currentUid()) return alertErr(t.needLogin);
+    if (!content) return alertErr(t.reviewPlaceholder);
+    apiFetch('/api/peipe-partners/profile/' + encodeURIComponent(p.uid) + '/comments', {
       method: 'POST',
       headers: { 'content-type': 'application/json; charset=utf-8', 'x-csrf-token': csrfToken() },
-      body: JSON.stringify({ rating: rating, content: content })
+      body: JSON.stringify({ rating: Math.max(1, Math.min(5, Number(state.currentRating || 5))), content: content })
     }).then(function () {
-      state.commentsLoaded = false;
       return loadComments();
     }).catch(function (err) {
-      if (hint) hint.textContent = handleCommentError(err);
-    }).finally(function () {
-      submit.disabled = false;
-      submit.textContent = state.viewerComment && state.viewerComment.id ? t('updateReview') : t('submitReview');
+      if (err.status === 403) alertErr(t.cannotReview);
+      else alertErr(err.message || t.reviewFail);
     });
+  }
+
+  function chooseAndUpload(kind) {
+    var t = lang();
+    if (!isOwn()) return;
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.style.display = 'none';
+    document.body.appendChild(input);
+    input.addEventListener('change', function () {
+      var file = input.files && input.files[0];
+      input.remove();
+      if (!file) return;
+      uploadProfileImage(kind, file);
+    });
+    input.click();
+  }
+
+  async function uploadProfileImage(kind, file) {
+    var t = lang();
+    try {
+      showBusy(t.uploading);
+      var cfg = kind === 'avatar' ? CONFIG.avatarImage : CONFIG.socialImage;
+      var compressed = await compressImageFile(file, cfg);
+      var url = await uploadToNodeBB(compressed);
+      var payload = {};
+      payload[kind === 'avatar' ? 'avatar' : 'cover'] = url;
+      var json = await apiFetch('/api/peipe-partners/profile/me/card', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json; charset=utf-8', 'x-csrf-token': csrfToken() },
+        body: JSON.stringify(payload)
+      });
+      if (kind === 'avatar') state.profile.picture = url;
+      else state.profile.cover = url;
+      if (json.profile) state.profile = normalizeProfile(Object.assign({}, state.profile, json.profile));
+      alertOk(t.uploadOk);
+      render();
+    } catch (err) {
+      alertErr((err && err.message) || t.uploadFail);
+    } finally {
+      hideBusy();
+    }
+  }
+
+  function showBusy(text) {
+    var old = document.getElementById('pxpBusyToast');
+    if (old) old.remove();
+    var div = document.createElement('div');
+    div.id = 'pxpBusyToast';
+    div.className = 'pxp-busy-toast';
+    div.textContent = text || '...';
+    document.body.appendChild(div);
+  }
+  function hideBusy() {
+    var old = document.getElementById('pxpBusyToast');
+    if (old) old.remove();
+  }
+
+  async function canEncode(type) {
+    try {
+      var canvas = document.createElement('canvas');
+      canvas.width = 1;
+      canvas.height = 1;
+      if (!canvas.toBlob) return false;
+      return await new Promise(function (resolve) {
+        canvas.toBlob(function (blob) {
+          resolve(!!blob && blob.type === type);
+        }, type, 0.8);
+      });
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function extForMime(type) {
+    if (type === 'image/webp') return '.webp';
+    if (type === 'image/png') return '.png';
+    return '.jpg';
+  }
+
+  async function compressImageFile(file, cfg) {
+    if (!file || !/^image\//i.test(file.type)) throw new Error('请选择图片文件');
+    if (/image\/(gif|svg\+xml|heic|heif)/i.test(file.type)) return file;
+    if (file.size < Number(cfg.minCompressBytes || 0)) return file;
+
+    var targetType = cfg.useWebp && await canEncode('image/webp') ? 'image/webp' : 'image/jpeg';
+    var blob = await compressByCanvas(file, targetType, cfg);
+    if (!blob) return file;
+
+    var base = String(file.name || ('image-' + Date.now())).replace(/\.[^.]+$/, '');
+    return new File([blob], base + extForMime(targetType), { type: targetType, lastModified: Date.now() });
+  }
+
+  async function compressByCanvas(file, targetType, cfg) {
+    var url = URL.createObjectURL(file);
+    try {
+      var img = await loadImage(url);
+      var width0 = img.naturalWidth || img.width;
+      var height0 = img.naturalHeight || img.height;
+      var scale = Math.min(1, Number(cfg.maxSide || 1080) / Math.max(width0, height0));
+      var canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(width0 * scale));
+      canvas.height = Math.max(1, Math.round(height0 * scale));
+      var ctx = canvas.getContext('2d');
+      if (!ctx || !canvas.toBlob) return null;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      var targetBytes = Number(cfg.maxSizeMB || 0.1) * 1024 * 1024;
+      var qualities = cfg.qualities && cfg.qualities.length ? cfg.qualities : [cfg.quality || 0.58, 0.5, 0.42, 0.34, 0.26];
+      var best = null;
+      for (var i = 0; i < qualities.length; i += 1) {
+        var q = qualities[i];
+        var b = await new Promise(function (resolve) {
+          canvas.toBlob(resolve, targetType, q);
+        });
+        if (!b) continue;
+        best = b;
+        if (b.size <= targetBytes) break;
+      }
+      return best;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  function loadImage(url) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () { resolve(img); };
+      img.onerror = function () { reject(new Error('图片读取失败，请换一张图片或重新选择')); };
+      img.src = url;
+    });
+  }
+
+  function uploadToNodeBB(file) {
+    var form = new FormData();
+    form.append('files[]', file);
+    form.append('cid', String(CONFIG.cid));
+    return fetch(rel('/api/post/upload'), {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'x-csrf-token': csrfToken(), 'x-requested-with': 'XMLHttpRequest' },
+      body: form
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (json) {
+        if (!res.ok) throw new Error(json.error || json.message || json.status && json.status.message || 'upload failed');
+        var url = extractUploadUrl(json);
+        if (!url) throw new Error('上传成功但没有返回图片地址');
+        return url;
+      });
+    });
+  }
+
+  function extractUploadUrl(payload) {
+    function looks(v) {
+      return typeof v === 'string' && v && (/^(https?:)?\//i.test(v) || /^\/assets\//i.test(v));
+    }
+    var queue = [payload], seen = new Set();
+    while (queue.length) {
+      var cur = queue.shift();
+      if (!cur || seen.has(cur)) continue;
+      if (looks(cur)) return cur;
+      if (typeof cur !== 'object') continue;
+      seen.add(cur);
+      if (Array.isArray(cur)) {
+        cur.forEach(function (x) { queue.push(x); });
+      } else {
+        Object.keys(cur).forEach(function (k) {
+          if (looks(cur[k])) queue.unshift(cur[k]);
+          else if (cur[k] && typeof cur[k] === 'object') queue.push(cur[k]);
+        });
+      }
+    }
+    return '';
+  }
+
+  function loadProfile() {
+    var slug = state.root.dataset.userslug || slugFromPath();
+    var uid = Number(state.root.dataset.uid || 0);
+    state.profile = normalizeProfile({ uid: uid, userslug: slug });
+    render();
+
+    var key = uid || slug;
+    return apiFetch('/api/peipe-partners/profile/' + encodeURIComponent(key) + '/card')
+      .then(function (json) {
+        state.profile = normalizeProfile(json.profile || json.user || json);
+        render();
+      })
+      .catch(function () {
+        return apiFetch('/api/user/' + encodeURIComponent(slug)).then(function (json) {
+          state.profile = normalizeProfile(json.user || json);
+          render();
+        }).catch(function () {});
+      });
   }
 
   function loadComments() {
-    var uid = Number(state.user && state.user.uid || 0);
-    if (!uid) return Promise.resolve();
-    state.commentsLoading = true;
-    state.commentsError = '';
-    render();
-    return apiFetch('/api/peipe-partners/profile/' + encodeURIComponent(uid) + '/comments?limit=50').then(function (json) {
-      state.comments = json.comments || [];
-      state.viewerComment = json.viewerComment || null;
-      state.averageRating = Number(json.averageRating || 0);
-      state.ratingCount = Number(json.ratingCount || 0);
-      if (state.viewerComment && state.viewerComment.rating) state.currentRating = Number(state.viewerComment.rating || 5);
-      state.commentsLoaded = true;
-    }).catch(function (err) {
-      state.commentsError = handleCommentError(err);
-      state.comments = [];
-      state.averageRating = 0;
-      state.ratingCount = 0;
-      state.commentsLoaded = false;
-    }).finally(function () {
-      state.commentsLoading = false;
-      render();
-    });
-  }
-
-  function loadTopics() {
-    var slug = userSlug();
-    if (!slug) return Promise.resolve();
-    state.topicsLoading = true;
-    state.topicsError = '';
-    render();
-    return apiFetch('/api/user/' + encodeURIComponent(slug) + '/topics').then(function (json) {
-      state.topics = topicListFromPayload(json).slice(0, 24);
-      state.topicsLoaded = true;
-    }).catch(function (err) {
-      state.topicsError = err && err.message || 'failed';
-      state.topics = [];
-      state.topicsLoaded = false;
-    }).finally(function () {
-      state.topicsLoading = false;
-      render();
-    });
-  }
-
-  function refreshUserInBackground() {
-    var slug = userSlug();
-    if (!slug) return;
-    apiFetch('/api/user/' + encodeURIComponent(slug)).then(function (json) {
-      var user = json.user || json;
-      state.user = mergeUser(state.user, user);
-      render();
-      if (state.activeTab === 'topics' && !state.topicsLoaded && !state.topicsLoading) loadTopics();
-    }).catch(function () {});
+    var p = state.profile || {};
+    if (!p.uid) return Promise.resolve();
+    return apiFetch('/api/peipe-partners/profile/' + encodeURIComponent(p.uid) + '/comments?limit=50')
+      .then(function (json) {
+        state.comments = json.comments || [];
+        state.viewerComment = json.viewerComment || null;
+        state.averageRating = Number(json.averageRating || 0);
+        state.ratingCount = Number(json.ratingCount || 0);
+        if (state.viewerComment && state.viewerComment.rating) state.currentRating = Number(state.viewerComment.rating);
+        render();
+      })
+      .catch(function () {
+        state.comments = [];
+        state.viewerComment = null;
+        state.averageRating = 0;
+        state.ratingCount = 0;
+        render();
+      });
   }
 
   function init() {
-    var root = document.getElementById('peipe-profile-app');
+    var root = document.getElementById('peipe-xhs-profile-app');
     if (!root) {
-      document.body.classList.remove('peipe-profile-mode');
+      document.body.classList.remove('peipe-xhs-active');
       return;
     }
     state.root = root;
-    state.user = collectInitialUser(root);
-    state.activeTab = getPathTab(root.getAttribute('data-default-tab') || 'comments');
-    state.commentsLoaded = false;
-    state.commentsLoading = false;
-    state.commentsError = '';
-    state.topicsLoaded = false;
-    state.topicsLoading = false;
-    state.topicsError = '';
-    document.body.classList.add('peipe-profile-mode');
-    render();
-    refreshUserInBackground();
-    if (state.activeTab === 'comments') loadComments();
-    if (state.activeTab === 'topics') loadTopics();
+    state.activeTab = tabFromPath();
+    document.body.classList.add('peipe-xhs-active');
+    loadProfile().then(loadComments);
   }
 
-  function bindNodebbEvents() {
-    if (window.jQuery) {
-      window.jQuery(window).off('action:ajaxify.end.peipeProfileV16 action:ajaxify.start.peipeProfileV16')
-        .on('action:ajaxify.start.peipeProfileV16', function () { document.body.classList.remove('peipe-profile-mode'); })
-        .on('action:ajaxify.end.peipeProfileV16', function () { setTimeout(init, 30); });
-    }
-    window.addEventListener('popstate', function () {
-      if (!state.root) return;
-      state.activeTab = getPathTab('comments');
-      render();
-      if (state.activeTab === 'topics' && !state.topicsLoaded && !state.topicsLoading) loadTopics();
-      if (state.activeTab === 'comments' && !state.commentsLoaded && !state.commentsLoading) loadComments();
-    });
-  }
-
-  bindNodebbEvents();
+  window.addEventListener('action:ajaxify.start', function () {
+    document.body.classList.remove('peipe-xhs-active');
+  });
+  window.addEventListener('action:ajaxify.end', init);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
