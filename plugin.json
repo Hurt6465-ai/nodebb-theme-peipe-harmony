@@ -1,27 +1,20 @@
 {
   "id": "nodebb-theme-peipe-harmony",
-  "hooks": [
-    { "hook": "static:app.load", "method": "init" },
-    { "hook": "filter:admin.header.build", "method": "addAdminNavigation" },
-    { "hook": "filter:widgets.getAreas", "method": "defineWidgetAreas" },
-    { "hook": "filter:config.get", "method": "getThemeConfig" },
-    { "hook": "filter:settings.get", "method": "getAdminSettings" },
-    { "hook": "filter:user.saveSettings", "method": "saveUserSettings" },
-    { "hook": "filter:user.profileMenu", "method": "addProfileItem" },
-    { "hook": "filter:middleware.renderHeader", "method": "filterMiddlewareRenderHeader" }
+  "name": "Peipe Harmony",
+  "description": "Peipe theme copied from Harmony",
+  "url": "https://github.com/Hurt6465-ai/nodebb-theme-peipe-harmony",
+  "library": "./library.js",
+  "staticDirs": {
+    "public": "public"
+  },
+  "less": [],
+  "scss": [
+    "theme.scss"
   ],
   "scripts": [
     "public/harmony.js",
     "public/peipe-profile.js"
   ],
-  "modules": {
-    "../admin/plugins/harmony.js": "public/admin.js",
-    "../client/account/theme.js": "public/settings.js"
-  },
-  "staticDirs": {
-    "inter": "node_modules/@fontsource/inter/files",
-    "poppins": "node_modules/@fontsource/poppins/files"
-  },
-  "languages": "languages",
-  "name": "Peipe Harmony"
+  "templates": "templates",
+  "languages": "languages"
 }
